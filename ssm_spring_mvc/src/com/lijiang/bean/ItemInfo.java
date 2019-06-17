@@ -2,7 +2,7 @@ package com.lijiang.bean;
 
 public class ItemInfo {
 
-	//id
+	
 	private Integer id;
 
 	private String username;
