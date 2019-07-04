@@ -8,11 +8,15 @@
 <title>Insert title here</title>
 <script src="${pageContext.request.contextPath }/js/jquery-3.3.1.min.js"></script>
 <link href="${pageContext.request.contextPath }/css/bootstrap.min.css"  rel="stylesheet">
+<link href="${pageContext.request.contextPath }/css/bootstrap-table.css"  rel="stylesheet">
 <script src="${pageContext.request.contextPath }/js/bootstrap.min.js"></script>
+<script src="${pageContext.request.contextPath }/js/bootstrap-table.js"></script>
 </head>
 <body>
-
-<table  class="table table-hover table table-striped">
+		<div id="toolbar">
+			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLayer"> <span class="glyphicon glyphicon-plus"></span>添加记录 </button>
+	    </div>
+<table  class="table table-hover table table-striped"  id="data-table">
 		<thead>
 			    <th>id</th>
 				<th>username</th>
@@ -25,17 +29,20 @@
 				    <td>${item.username}</td>
 				    <td>${item.password}</td>
 				    <td>
-				    	<button class="btn btn-success btn-xs"  data-toggle="modal" data-target="#editLayer" onclick="editItems(${item.id})">修改</button>
-				    	<button class="btn btn-danger btn-xs" onclick="deleteItem(${item.id})">删除</button>
+				    	<button class="btn btn-success btn-xs"  data-toggle="modal" data-target="#editLayer" onclick="editItems(${item.id})"><span class="glyphicon glyphicon-pencil"></span>修改</button>
+				    	<button class="btn btn-danger btn-xs" onclick="deleteItem(${item.id})"><span class="glyphicon glyphicon-remove"></span>删除</button>
 				    	
 				    </td>
 
 				</tr>
 				
-			</c:forEach>
+			</c:forEach>		                    
+             
+		</tbody>
+	</table>
+
+	<!-- 			记录添加弹出层 -->
 			
-<!-- 			记录添加弹出层 -->
-			<button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addLayer"> 添加记录 </button>
 			<div class="modal fade" id="addLayer" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
 			<div class="modal-dialog">
 			        <div class="modal-content">
@@ -65,17 +72,17 @@
 			 <!-- <div style="height:200px"></div> -->
 			 
 <!-- 			查询记录  -->
-			 <form id="search_form" action="${pageContext.request.contextPath }/admin/items/allList.do" method="post">
-	           <div class="row">
-	                 <div class="col-md-2">
-	                       <input type="text" id="search_item_name" class="form-control input-sm" placeholder="输入用户名" name="username" value="">
-	                 </div>                
-	                 <div class="col-md-9">
+<%-- 			 <form id="search_form" action="${pageContext.request.contextPath }/admin/items/allList.do" method="post"> --%>
+<!-- 	           <div class="row"> -->
+<!-- 	                 <div class="col-md-2"> -->
+<!-- 	                       <input type="text" id="search_item_name" class="form-control input-sm" placeholder="输入用户名" name="username" value=""> -->
+<!-- 	                 </div>                 -->
+<!-- 	                 <div class="col-md-9"> -->
 	                    
-	                    <button id="search_btn" type="submit" class="btn btn-primary">查询</button>&nbsp;&nbsp;
-	                 </div>
-	            </div> 
-             </form>
+<!-- 	                    <button id="search_btn" type="submit" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span>查询</button>&nbsp;&nbsp; -->
+<!-- 	                 </div> -->
+<!-- 	            </div>  -->
+<!--              </form> -->
              
              
   <!-- 			记录修改弹出层 -->
@@ -105,12 +112,7 @@
 			        </div>
 			      </div>
 			</div>
-			 <!-- <div style="height:200px"></div> -->           
-             
-             
-		</tbody>
-	</table>
-
+			 <!-- <div style="height:200px"></div> -->   
 </body>
 <script type="text/javascript">
   $(function(){
@@ -185,6 +187,104 @@
 			}
 		});
 	}
+	
+	
+// 	分页插件bootstrap-table
+	var $table = $('#data-table');
+	//查询参数
+	var queryParams = {id: 1};
+
+//	 	$table.bootstrapTable('destroy');    //先销毁表格
+	 	//初始化表格
+	$table.bootstrapTable({
+		//表格参数
+        url: '${pageContext.request.contextPath }/admin/items/user/allList.do', //请求地址
+        method: "post",  //请求方式
+        contentType: "application/x-www-form-urlencoded",   //请求内容类型
+        dataType: "json",  //数据类型
+//        height: '582',  //table高度：如果没有设置，表格自动根据记录条数觉得表格高度
+        striped: true,  //是否显示行间隔色
+        sortable: true,  //是否启用排序
+        sortOrder: "asc",  //排序方式
+        cache: false,  //是否使用缓存
+        toolbar: "#toolbar",  //指定工具栏
+        uniqueId: "id",   //每行的唯一标识
+        showRefresh: true,  //显示刷新按钮
+        showToggle: true,   //切换显示样式
+        cardView: false,  //默认显示详细视图
+        search: true,  //是否显示搜索
+        pagination: true,  //是否显示分页
+        clickToSelect: false,   //是否启用点击选中行
+        minimumCountColumns: 2,   //最少要显示的列数
+        showColumns: true,   //显示隐藏列
+        undefinedText: '-',    //cell没有值时显示
+        //分页方式：client客户端分页，server服务端分页
+/*	              指定。注意，这两种后台传过来的json数据格式也不一样 
+		client : 正常的json array格式 [{},{},{}] 
+		server： {“total”:0,”rows”:[]} 其中total表示查询的所有数据条数，后面的rows是指当前页面展示的数据量。*/
+        sidePagination: "client",
+        pageSize: 10,  //每页的记录行数
+        pageNumber: 1,   //初始化加载第1页，默认第1页
+        pageList: "[5,10, 20, 50, 80, 100]",    //可供选择的每页的行数
+        paginationFirstText: "首页",
+        paginationPreText: "上一页",
+        paginationNextText: "下一页",
+        paginationLastText: "末页",
+        buttonsClass: 'btn',   //按钮样式
+        iconSize: 'pager',   //分页器class
+        queryParams: queryParams,    //查询条件
+        //列参数
+        //表头
+	    columns: [
+	  
+        {
+	        field: 'id',
+	        title: 'id',
+	        align: 'center' // 居中显示
+	    }, {
+	        field: 'username',
+	        title: '用户名',
+	        align: 'center' // 居中显示
+	    }, {
+	        field: 'password',
+	        title: '密码',
+	        align: 'center' // 居中显示
+	    } ,
+	    {
+	     	title: '操作',
+	    	checkbox: false,
+	    	align: 'center' // 居中显示
+	    } ],
+	    
+	    onLoadSuccess: function (res) {//可不写
+        //加载成功时
+        	console.log(res);
+        }, 
+        
+        onLoadError: function (statusCode) {
+            return "加载失败了"
+        }, 
+        
+        formatLoadingMessage: function () {
+            //正在加载
+            return "拼命加载中...";
+        }, 
+        
+        formatNoMatches: function () {
+            //没有匹配的结果
+            return '无符合条件的记录';
+        }
+
+		});
+		
+		// 获取表格所有已经勾选的行数据，为一个对象数组
+		var selects = $table.bootstrapTable('getSelections');
+	
+		//刷新
+		$("#btnRefresh").on('click', function(){
+			$table.bootstrapTable('refresh');
+		});
+	
 	
 
 </script>
